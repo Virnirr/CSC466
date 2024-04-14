@@ -27,13 +27,15 @@ public class DocumentCollection implements Serializable {
             "would", "you", "your", "yours", "yes"};
 
     private HashMap<Integer, TextVector> documents;
-    public DocumentCollection(String file_name) {
+    public DocumentCollection(String file_name, String type_of_vector) {
     /*
      a constructor that reads the file that is specified as input and it
      uses the data in the file to populate the documents variable. //about 50 lines of code
      */
      this.documents = new HashMap<Integer, TextVector>();
+
      try {
+
          File file = new File(file_name);
          Scanner scan_file = new Scanner(file);
          int curr_doc = 0;
@@ -42,7 +44,16 @@ public class DocumentCollection implements Serializable {
 
          // add it to the documents HashMap if it's new document
          if (line[0].equals(".I")) {
-             this.documents.put(Integer.valueOf(line[1]), new TextVector());
+             int document_key = Integer.parseInt(line[1]);
+
+
+             // if type equals document, add vector as document, else as query vector
+             if (type_of_vector.equals("document")) {
+                 this.documents.put(document_key, new DocumentVector());
+             }
+             else {
+                 this.documents.put(document_key, new QueryVector());
+             }
              curr_doc = Integer.parseInt(line[1]);
          }
 
@@ -50,6 +61,7 @@ public class DocumentCollection implements Serializable {
          while (scan_file.hasNextLine()) {
              // parse through unneeded lines
              line = scan_file.nextLine().split(" ");
+
 
              // if body (.W), keep reading until reaching new document (.I)
              if (line[0].equals(".W")) {
@@ -59,10 +71,20 @@ public class DocumentCollection implements Serializable {
 
                      // break on the next .I (document), end of body
                      if (next_line_body[0].equals(".I")) {
-                         this.documents.put(Integer.valueOf(next_line_body[1]), new TextVector());
+                         int document_key = Integer.parseInt(next_line_body[1]);
+
+
+                         // if type equals document, add vector as document, else as query vector
+                         if (type_of_vector.equals("document")) {
+                             this.documents.put(document_key, new DocumentVector());
+                         }
+                         else {
+                             this.documents.put(document_key, new QueryVector());
+                         }
                          curr_doc = Integer.parseInt(next_line_body[1]);
                          break;
                      }
+
 
                      // break words out and extract as TextVector
                      String[] lower_case_words = tokenize(line_body);
@@ -82,9 +104,9 @@ public class DocumentCollection implements Serializable {
 
     }
 
+
     private String[] tokenize(String line) {
-        line = line.toLowerCase();
-        return line.split("[^a-zA-Z]+");
+        return line.toLowerCase().split("[^a-zA-Z]+");
     }
 
     public TextVector getDocumentById(int id) {
@@ -136,6 +158,7 @@ public class DocumentCollection implements Serializable {
         /*
             returns the number of documents that contain the input word.
         */
+
         int total_document_contain_word = 0;
 
         for (Map.Entry<Integer, TextVector> entry : this.getEntrySet()) {
@@ -174,6 +197,12 @@ public class DocumentCollection implements Serializable {
             }
         }
         return highest_word_freq_document;
+    }
+
+    public void normalizeAll(DocumentCollection dc) {
+        for (Map.Entry<Integer, TextVector> entry : getEntrySet()) {
+            entry.getValue().normalize(dc);
+        }
     }
 
 

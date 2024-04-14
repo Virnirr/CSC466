@@ -1,11 +1,10 @@
 package DocumentClasses;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
-public class TextVector implements Serializable {
+public abstract class TextVector implements Serializable {
 
     private final HashMap<String, Integer> rawVector;
     public TextVector() {
@@ -53,8 +52,7 @@ public class TextVector implements Serializable {
 
         int highest_freq = 0;
 
-        for (Map.Entry<String, Integer> entry : this.rawVector.entrySet()) {
-            String key = entry.getKey();
+        for (Map.Entry<String, Integer> entry : getRawVectorEntrySet()) {
             int value = entry.getValue();
             if (value > highest_freq) {
                 highest_freq = value;
@@ -80,5 +78,52 @@ public class TextVector implements Serializable {
         }
 
         return word_to_highest_freq;
+    }
+    //returns the normalized frequency for each word
+    public abstract Set<Map.Entry<String, Double>> getNormalizedVectorEntrySet();
+
+    //will normalize the frequency of each word using the TF-IDF formula
+    public abstract void normalize(DocumentCollection dc);
+
+    //will return the normalized frequency of the word
+    public abstract double getNormalizedFrequency(String word);
+    public double getL2Norm() {
+        /*
+            method to get the normalized frequencies. Then it returns the square root
+            of the sum of the squares of the frequencies
+
+            Note: returns the size of the vector (normalized)
+        */
+        double total_normalized_freq_val = 0.0;
+
+        for (Map.Entry<String, Double> entry : this.getNormalizedVectorEntrySet()) {
+            total_normalized_freq_val += (Math.pow(entry.getValue(), 2));
+        }
+
+        return Math.sqrt(total_normalized_freq_val);
+    }
+
+    public ArrayList<Integer> findClosestDocuments(DocumentCollection documents, DocumentDistance distanceAlg) {
+        /*
+            method that returns the 20 closest documents as an ArrayList<Integer>
+        */
+
+        // <Document Number, Similarity Score>
+        HashMap<Integer, Double> documentByClosest = new HashMap<>();
+
+        // calculate the closest documents to current query vector
+        for (Map.Entry<Integer, TextVector> document : documents.getEntrySet()) {
+            int document_num = document.getKey();
+            double similarity_score = distanceAlg.findDistance(this, document.getValue(), documents);
+            documentByClosest.put(document_num, similarity_score);
+        }
+
+        // return sorted list and top 20 sorted in descending order by similarity score
+        return documentByClosest.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .limit(20)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }
