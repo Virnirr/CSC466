@@ -41,18 +41,18 @@ public class DocumentCollection implements Serializable {
          int curr_doc = 0;
 
          String[] line = scan_file.nextLine().split(" ");
+         int query_num = 1;
 
          // add it to the documents HashMap if it's new document
          if (line[0].equals(".I")) {
              int document_key = Integer.parseInt(line[1]);
-
 
              // if type equals document, add vector as document, else as query vector
              if (type_of_vector.equals("document")) {
                  this.documents.put(document_key, new DocumentVector());
              }
              else {
-                 this.documents.put(document_key, new QueryVector());
+                 this.documents.put(query_num, new QueryVector());
              }
              curr_doc = Integer.parseInt(line[1]);
          }
@@ -72,14 +72,14 @@ public class DocumentCollection implements Serializable {
                      // break on the next .I (document), end of body
                      if (next_line_body[0].equals(".I")) {
                          int document_key = Integer.parseInt(next_line_body[1]);
-
+                         query_num++; // increment after seeing next document
 
                          // if type equals document, add vector as document, else as query vector
                          if (type_of_vector.equals("document")) {
                              this.documents.put(document_key, new DocumentVector());
                          }
                          else {
-                             this.documents.put(document_key, new QueryVector());
+                             this.documents.put(query_num, new QueryVector());
                          }
                          curr_doc = Integer.parseInt(next_line_body[1]);
                          break;
@@ -89,6 +89,11 @@ public class DocumentCollection implements Serializable {
                      // break words out and extract as TextVector
                      String[] lower_case_words = tokenize(line_body);
                      TextVector curr_vector = this.documents.get(curr_doc);
+
+                     // getting TextVector is different for a query since it only increments by 1
+                     if (type_of_vector.equals("query")) {
+                         curr_vector = this.documents.get(query_num);
+                     }
                      for (String word : lower_case_words) {
                          // only add like a length of 2 and not noise word
                          if (word.length() >= 2 && !isNoiseWord(word))
@@ -116,14 +121,14 @@ public class DocumentCollection implements Serializable {
         return this.documents.get(id);
     }
 
-    public float getAverageDocumentLength() {
+    public double getAverageDocumentLength() {
         /*
         returns the average length of a document not counting noise words.
         Use the method getTotalWordCount() on each document to calculate the
         number of non-noise words in each document. Add up the numbers and
         divide by the total number of documents.
          */
-        return (float) getTotalWordCount() / getSize();
+        return (double) getTotalWordCount() / (double) getSize();
     }
 
     public int getTotalWordCount() {
