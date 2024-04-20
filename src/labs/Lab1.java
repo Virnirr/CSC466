@@ -7,9 +7,9 @@ import java.io.ObjectOutputStream;
 
 public class Lab1 {
     public static void main(String[] args) {
-        DocumentCollection docs = new DocumentCollection("/Users/zhihe/CSC466/lab1/src/labs/documents.txt", "document");
+        DocumentCollection docs = new DocumentCollection("/Users/zhihe/CSC466/labs/src/labs/documents.txt", "document");
         try(ObjectOutputStream os = new ObjectOutputStream(new
-                FileOutputStream(new File("/Users/zhihe/CSC466/lab1/src/labs/files/docvector")))){
+                FileOutputStream(new File("/Users/zhihe/CSC466/labs/src/labs/files/docvector")))){
             os.writeObject(docs);
         } catch(Exception e){
             System.out.println(e);

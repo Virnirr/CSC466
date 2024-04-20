@@ -18,15 +18,15 @@ public class Lab3 {
         HashMap<Integer, ArrayList<Integer>> cosineResults = new HashMap<>();
         HashMap<Integer, ArrayList<Integer>> humanJudgement = new HashMap<>();
 
-        queries = new DocumentCollection("/Users/zhihe/CSC466/lab1/src/labs/queries.txt", "query");
-        try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(new File("/Users/zhihe/CSC466/lab1/src/labs/files/docvector")))) {
+        queries = new DocumentCollection("/Users/zhihe/CSC466/labs/src/labs/queries.txt", "query");
+        try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(new File("/Users/zhihe/CSC466/labs/src/labs/files/docvector")))) {
             documents = (DocumentCollection) is.readObject();
 
             // normalize both documents and queries
             documents.normalizeAll(documents);
             queries.normalizeAll(documents);
 
-            File file = new File("/Users/zhihe/CSC466/lab1/src/labs/human_judgement.txt");
+            File file = new File("/Users/zhihe/CSC466/labs/src/labs/human_judgement.txt");
             Scanner scan_file = new Scanner(file);
 
             // human_judgement_tokenize[0] = <query num>
@@ -47,8 +47,8 @@ public class Lab3 {
                 }
             }
 
-            System.out.print("THIS IS HUMAN JUDGEMENT: ");
-            System.out.println(humanJudgement);
+//            System.out.print("THIS IS HUMAN JUDGEMENT: ");
+//            System.out.println(humanJudgement);
 
 
             CosineDistance CosineDistance = new CosineDistance();
@@ -64,7 +64,7 @@ public class Lab3 {
 //            System.out.println(cosineResults);
 //            System.out.println(okapiResults);
 
-            // OUtput Result of MAP score
+            // Output Result of MAP score
             System.out.println("Cosine MAP = " +
                     computeMAP(humanJudgement, cosineResults));
             System.out.println("Okapi MAP = " +
