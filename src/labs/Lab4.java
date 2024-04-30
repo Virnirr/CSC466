@@ -59,9 +59,6 @@ public class Lab4 {
                             page_rank += (d * incoming_link_prestige);
                         }
                     }
-                    else {
-                        page_rank = (1.0-d) / (double) nodes.size();
-                    }
                     pageRankNew.put(pageEntry, page_rank);
                 }
 
