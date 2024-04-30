@@ -1,20 +1,18 @@
 package AprioriAlgorithm;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class Rule {
-    ItemSet left, right;
+    ItemSet left, right, combined;
     public Rule(ItemSet left, ItemSet right) {
         this.left = left;
         this.right = right;
-    }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Rule rule = (Rule) o;
-        return Objects.equals(left, rule.left) && Objects.equals(right, rule.right);
+        // add combined to calculate Confidence score
+        this.combined = new ItemSet(new ArrayList<>());
+        this.combined.addSet(left);
+        this.combined.addSet(right);
     }
 
     @Override

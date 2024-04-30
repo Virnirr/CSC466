@@ -6,8 +6,8 @@ import java.util.Objects;
 
 public class ItemSet {
     private final ArrayList<Integer> items;
-    public ItemSet(ArrayList<Integer> items) {
-        this.items = items;
+    public ItemSet(List<Integer> items) {
+        this.items = new ArrayList<>(items);
     }
     public ArrayList<Integer> getItems() {
         return this.items;
@@ -22,6 +22,10 @@ public class ItemSet {
             }
         }
         return true;
+    }
+
+    public void addSet(ItemSet items) {
+        this.items.addAll(items.getItems());
     }
 
     @Override

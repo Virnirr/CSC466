@@ -13,8 +13,9 @@ public class Lab6 {
     static final String fileName = "/Users/zhihe/CSC466/labs/src/AprioriAlgorithm/shopping_data.txt";
     static final double MINSUP = 0.01;
     static final double MINCONFIDENCE = 0.99;
-    ArrayList<Rule> rules = new ArrayList<>();
+    static ArrayList<Rule> rules = new ArrayList<>();
     static final String RESULTS = "{1=[[0], [1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11], [12], [13], [14], [15], [16], [17], [18], [19], [20], [21], [22], [23], [24], [25], [26], [27], [28], [29], [30], [31], [32], [33], [34], [35], [36], [37], [38], [39], [40], [41], [42], [43], [44], [45], [46], [47], [48], [49]], 2=[[0, 2], [0, 46], [1, 19], [2, 46], [3, 18], [3, 35], [4, 9], [5, 14], [5, 22], [5, 31], [5, 42], [7, 11], [7, 15], [7, 37], [7, 45], [7, 49], [9, 13], [9, 45], [11, 37], [11, 45], [12, 31], [12, 36], [12, 48], [14, 22], [14, 44], [15, 49], [16, 32], [16, 45], [17, 29], [17, 47], [18, 35], [23, 24], [23, 33], [23, 40], [23, 41], [23, 42], [23, 43], [24, 40], [24, 41], [24, 43], [27, 28], [29, 47], [31, 36], [31, 48], [32, 45], [33, 42], [36, 48], [37, 45], [40, 41], [40, 43], [41, 43]], 3=[[0, 2, 46], [3, 18, 35], [7, 11, 37], [7, 11, 45], [7, 15, 49], [7, 37, 45], [11, 37, 45], [12, 31, 36], [12, 31, 48], [12, 36, 48], [16, 32, 45], [17, 29, 47], [23, 24, 40], [23, 24, 41], [23, 24, 43], [23, 40, 41], [23, 40, 43], [23, 41, 43], [24, 40, 41], [24, 40, 43], [24, 41, 43], [31, 36, 48], [40, 41, 43]], 4=[[7, 11, 37, 45], [12, 31, 36, 48], [23, 24, 40, 41], [23, 24, 40, 43], [23, 24, 41, 43], [23, 40, 41, 43], [24, 40, 41, 43]], 5=[[23, 24, 40, 41, 43]]}";
+    static final String RULERESULTS ="[[32, 45]->[16], [17, 29]->[47], [29, 47]->[17], [23, 41]->[24], [7, 11, 45]->[37], [7, 37, 45]->[11], [11, 37, 45]->[7], [12, 31, 48]->[36], [12, 36, 48]->[31], [31, 36, 48]->[12], [23, 24, 40]->[41], [23, 40, 41]->[24], [24, 40, 41]->[23], [23, 24, 43]->[40], [23, 40, 43]->[24], [24, 40, 43]->[23], [23, 24, 43]->[41], [23, 41, 43]->[24], [24, 41, 43]->[23], [23, 40, 43]->[41], [23, 41, 43]->[40], [40, 41, 43]->[23], [24, 40, 43]->[41], [24, 41, 43]->[40], [40, 41, 43]->[24], [23, 24, 40, 43]->[41], [23, 24, 41, 43]->[40], [23, 24, 43]->[40, 41], [23, 40, 41, 43]->[24], [23, 40, 43]->[24, 41], [23, 41, 43]->[24, 40], [24, 40, 41, 43]->[23], [24, 40, 43]->[23, 41], [24, 41, 43]->[23, 40], [40, 41, 43]->[23, 24]]";
 
     public static void main(String[] args) {
         // process the file
@@ -37,36 +38,53 @@ public class Lab6 {
         }
         System.out.println(frequentItemSet);
         assert frequentItemSet.toString().equals(RESULTS);
+
+
         generateRules();
+        System.out.println(rules);
+        assert rules.toString().equals(RULERESULTS);
     }
     public static void generateRules() {
-        for (Map.Entry<Integer, ArrayList<ItemSet>> frequentSet : frequentItemSet.entrySet()) {
-            ArrayList<ItemSet> allFrequentSubsets = new ArrayList<>();
-            for (ItemSet frequenItems : frequentSet.getValue()) {
+        for (int k = 2; k < frequentItemSet.size() + 1; k++) {
+            ArrayList<ItemSet> frequenSet = frequentItemSet.get(k);
+            ArrayList<Rule> allAssociationRules = new ArrayList<>();
+            for (ItemSet frequenItems : frequenSet) {
                 // create subsets
                 ArrayList<Integer> items = frequenItems.getItems();
-                for (int i = 0; i < items.size(); i++) {
-                    for (int j = i+1; j < items.size(); j++) {
-                        ArrayList<Integer> subListItems = items.subList(i, j);
-                        ItemSet subItems = new ItemSet(subListItems);
-                        // if it's a frequency item and it's not in the allFrequentSubsets already, then add it.
-                        if (frequentItemSet.get(subItems.getItems().size()).contains(subItems)
-                                && !allFrequentSubsets.contains(subItems)) {
-                            allFrequentSubsets.add(subItems);
-                        }
+                for (Integer item : items) {
+                    ArrayList<Integer> tempItems = (ArrayList<Integer>) items.clone();
+                    ItemSet one_item = new ItemSet(Collections.singletonList(item));
+
+                    // remove the item from the list and call it the rest
+                    tempItems.remove(tempItems.indexOf(item)); // Remove the item from the copy
+                    ItemSet rest_item = new ItemSet(tempItems);
+
+                    // if rule meets minimum confidence requirement, add it to the list.
+                    Rule association = new Rule(rest_item, one_item);
+                    if (isMinConfidenceMet(association)) {
+                        allAssociationRules.add(association);
                     }
                 }
             }
-            System.out.println(allFrequentSubsets);
+            rules.addAll(allAssociationRules);
         }
     }
 
-//    public void pGenRules() {
-//
-//    }
-//    public static boolean isMinConfidenceMet(Rule r) {
-//
-//    }
+    public static boolean isMinConfidenceMet(Rule r) {
+        // calculate the confidence score of a Rule
+        double countCombinedItemSet = 0;
+        double countLeftItemSet = 0;
+        for (ItemSet item : transactions) {
+            if (item.containsSet(r.combined)) {
+                countCombinedItemSet++;
+            }
+            if (item.containsSet(r.left)) {
+                countLeftItemSet++;
+            }
+        }
+        // (X U Y).count / X.count
+        return (countCombinedItemSet / countLeftItemSet) >= MINCONFIDENCE;
+    }
 
 
     public static void process(String fileName) {
