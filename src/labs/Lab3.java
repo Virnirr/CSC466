@@ -61,8 +61,8 @@ public class Lab3 {
                 okapiResults.put(i, queries.getDocumentById(i).findClosestDocuments(documents, OkapiDistance));
             }
 
-//            System.out.println(cosineResults);
-//            System.out.println(okapiResults);
+            System.out.println(cosineResults);
+            System.out.println(okapiResults);
 
             // Output Result of MAP score
             System.out.println("Cosine MAP = " +
